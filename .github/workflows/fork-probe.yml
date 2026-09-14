@@ -1,0 +1,27 @@
+name: fork-probe
+
+on:
+  pull_request: {}
+
+permissions:
+  checks: write
+  statuses: write
+  contents: read
+
+jobs:
+  probe:
+    if: ${{ github.event.pull_request.head.repo.fork == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: attempt privileged writes from a fork PR run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          echo "== fork PR run: token capability probe =="
+          echo "sha=${{ github.sha }} head_repo_fork=${{ github.event.pull_request.head.repo.fork }}"
+          gh api -X POST "/repos/${GITHUB_REPOSITORY}/check-runs" \
+            -f name="fork-probe-attempt" -f head_sha="${{ github.sha }}" \
+            -f status=completed -f conclusion=success ; echo "check-run rc=$?"
+          gh api -X POST "/repos/${GITHUB_REPOSITORY}/statuses/${{ github.sha }}" \
+            -f state=success -f context="fork-probe-status" ; echo "status rc=$?"
