@@ -1,0 +1,12 @@
+name: sem-job
+
+on:
+  pull_request: {}
+
+jobs:
+  gate:
+    name: gapgate
+    runs-on: ubuntu-latest
+    steps:
+      - name: ok
+        run: echo "job-mediated check named gapgate"
