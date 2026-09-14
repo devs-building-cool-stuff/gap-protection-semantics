@@ -9,4 +9,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ok
-        run: echo "job-mediated check named gapgate"
+        run: exit 1
