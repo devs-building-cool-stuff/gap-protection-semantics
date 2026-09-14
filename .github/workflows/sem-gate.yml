@@ -1,0 +1,33 @@
+name: sem-gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      context:
+        description: "check context name"
+        required: true
+        default: "gapgate"
+      conclusion:
+        description: "check conclusion"
+        required: true
+        default: "success"
+
+permissions:
+  checks: write
+  contents: read
+
+jobs:
+  emit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: emit check run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "ref=${{ github.ref }} sha=${{ github.sha }} context=${{ inputs.context }} conclusion=${{ inputs.conclusion }}"
+          gh api -X POST "/repos/${GITHUB_REPOSITORY}/check-runs" \
+            -f name="${{ inputs.context }}" \
+            -f head_sha="${{ github.sha }}" \
+            -f status=completed \
+            -f conclusion="${{ inputs.conclusion }}" \
+            --jq '{id,name,conclusion,app_id:.app.id,app_slug:.app.slug,head_sha}'
